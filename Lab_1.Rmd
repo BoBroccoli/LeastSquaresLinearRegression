@@ -1,0 +1,44 @@
+#1
+MyData <- read.csv("C:/Users/wenbo/Downloads/slumptest.csv")
+print(MyData)
+#2
+least_squares_linear_regression <- function(df_X, Y){
+  m <- data.matrix(df_X)
+  y <- data.matrix(Y)
+  b <- solve( t(m) %*% m ) %*% t(m) %*% y
+  return (b)
+}
+least_squares_linear_regression(MyData[,2:10], MyData[,11])
+#1
+#y = 0.1036*x1 + 0.0292*x2 + 0.0919*x3 - 0.09206*x4 + 0.218*x5 - 0.00976*x6 + 0.0185*x7 - 0.2284*x8 + 0.0777897*x9
+#4
+k_fold_validation <- function(df, k){
+  df_new <- df[sample(nrow(df)),]
+  subset <- nrow(df)/k
+  train_error <- 0
+  
+  for(loop in 1:k){
+    upper <- floor((loop-1)*subset)
+    lower <- floor((loop)*subset)
+    train_set1 <- df[0:upper,]
+    train_set2 <- df[lower:103,]
+    train_set <- rbind(train_set1, train_set2)
+    B <- least_squares_linear_regression(train_set[,2:10], train_set[,11])
+    sum_square <- 0
+
+    test_set <- df[upper:lower,]
+    for(i in 1:nrow(test_set)) {
+      row <- test_set[i,2:10]
+      square <- ((train_set[i,11] - data.matrix(row) %*% data.matrix(B)) * (train_set[i,11] - data.matrix(row) %*% data.matrix(B)))
+      sum_square = sum_square + square
+    }
+    train_error <- train_error+sum_square
+  }
+  return (train_error/nrow(df))
+  
+}
+#5
+k_fold_validation(MyData,5)
+#6
+lm(formular= Compressive.Strength..28.day..Mpa.~ Cement +Slag + Fly.ash +Water +SP+ Coarse.Aggr.+ Fine.Aggr. +SLUMP.cm. +FLOW.cm., data=MyData)
+#Not same
